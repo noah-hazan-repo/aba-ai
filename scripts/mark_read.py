@@ -11,7 +11,7 @@ from googleapiclient.discovery import build
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(os.path.dirname(__file__), "..", "data"))
 TOKEN_PATH = os.path.join(DATA_DIR, "gmail_token.json")
-CLIENT_SECRET_PATH = os.path.join(CREDS_DIR, "client_secret.json")
+CLIENT_SECRET_PATH = os.path.join(DATA_DIR, "client_secret.json")
 
 
 def get_gmail_service():
