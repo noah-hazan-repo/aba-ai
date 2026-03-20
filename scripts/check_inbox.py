@@ -72,6 +72,7 @@ def main():
         output.append({
             "message_id": msg["id"],
             "thread_id": msg["threadId"],
+            "rfc_message_id": headers.get("message-id", ""),
             "from": headers.get("from", ""),
             "to": headers.get("to", ""),
             "subject": headers.get("subject", ""),

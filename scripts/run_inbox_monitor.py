@@ -139,7 +139,7 @@ def main():
                     sender,
                     action["response_subject"],
                     action["response_body"],
-                    reply_to_message_id=msg["message_id"],
+                    reply_to_message_id=msg.get("rfc_message_id"),
                     thread_id=msg["thread_id"],
                 )
                 print(f"    Sent response.")
