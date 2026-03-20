@@ -17,8 +17,40 @@ from update_state import load_state, save_state, ensure_provider
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 
+TEST_MODE = os.environ.get("TEST_MODE", "false").lower() == "true"
+
+
 def capture_hours_report() -> dict:
-    """Run check_hours and capture the JSON output."""
+    """Run check_hours and capture the JSON output, or return dummy data in test mode."""
+    if TEST_MODE:
+        today = date.today()
+        return {
+            "report_date": today.isoformat(),
+            "month": today.strftime("%B %Y"),
+            "monthly_target": 30.0,
+            "total_business_days": 22,
+            "elapsed_business_days": 15,
+            "remaining_business_days": 7,
+            "expected_pace_hours": 20.45,
+            "providers": [
+                {
+                    "provider_id": "0000000",
+                    "first_name": "Noah",
+                    "last_name": "Hazan",
+                    "email": "noahhazan1@gmail.com",
+                    "mtd_hours": 12.5,
+                    "projected_hours": 18.33,
+                    "hours_needed": 17.5,
+                    "required_daily_rate": 2.5,
+                    "status": "behind",
+                    "is_paused": False,
+                    "paused_until": None,
+                    "reminders_sent_this_month": 0,
+                }
+            ],
+            "behind_count": 1,
+        }
+
     import io
     from contextlib import redirect_stdout
     f = io.StringIO()

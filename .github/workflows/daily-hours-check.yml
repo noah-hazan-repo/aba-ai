@@ -41,6 +41,7 @@ jobs:
         env:
           DATA_DIR: data
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TEST_MODE: "true"  # Remove this line to go live with real BigQuery data
         run: python scripts/run_daily_check.py
 
       - name: Upload updated state
