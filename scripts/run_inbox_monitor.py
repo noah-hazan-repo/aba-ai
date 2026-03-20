@@ -134,10 +134,16 @@ def main():
 
         # Send response if needed
         if action["needs_response"] and action.get("response_body"):
+            # Derive subject from original to ensure Gmail threads correctly
+            original_subject = msg.get("subject", "")
+            if original_subject.lower().startswith("re:"):
+                reply_subject = original_subject
+            else:
+                reply_subject = f"Re: {original_subject}"
             try:
                 send_email(
                     sender,
-                    action["response_subject"],
+                    reply_subject,
                     action["response_body"],
                     reply_to_message_id=msg.get("rfc_message_id"),
                     thread_id=msg["thread_id"],
