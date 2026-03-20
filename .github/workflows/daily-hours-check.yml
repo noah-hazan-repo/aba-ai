@@ -1,0 +1,51 @@
+name: Daily BCBA Hours Check
+
+on:
+  schedule:
+    # 8am ET = 12:00 UTC (EDT) or 13:00 UTC (EST)
+    - cron: '0 12 * * 1-5'
+  workflow_dispatch: # Manual trigger for testing
+
+jobs:
+  check-hours:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Write credentials
+        env:
+          BQ_SERVICE_ACCOUNT_JSON: ${{ secrets.BQ_SERVICE_ACCOUNT_JSON }}
+          GMAIL_CLIENT_SECRET_JSON: ${{ secrets.GMAIL_CLIENT_SECRET_JSON }}
+          GMAIL_TOKEN_JSON: ${{ secrets.GMAIL_TOKEN_JSON }}
+        run: |
+          mkdir -p data
+          echo "$BQ_SERVICE_ACCOUNT_JSON" > data/bq_service_account.json
+          echo "$GMAIL_CLIENT_SECRET_JSON" > data/client_secret.json
+          echo "$GMAIL_TOKEN_JSON" > data/gmail_token.json
+
+      - name: Pull latest state
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Download state artifact if it exists
+          gh run download --name reminder-state --dir data 2>/dev/null || echo '{"providers": {}, "flagged_for_review": []}' > data/reminder_state.json
+
+      - name: Run daily hours check
+        env:
+          DATA_DIR: data
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/run_daily_check.py
+
+      - name: Upload updated state
+        uses: actions/upload-artifact@v4
+        with:
+          name: reminder-state
+          path: data/reminder_state.json
+          overwrite: true

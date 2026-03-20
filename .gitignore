@@ -1,0 +1,7 @@
+# Credentials - never commit these
+workspace/data/client_secret.json
+workspace/data/gmail_token.json
+workspace/data/bq_service_account.json
+*.pyc
+__pycache__/
+.env

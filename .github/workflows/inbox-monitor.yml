@@ -1,0 +1,49 @@
+name: Inbox Monitor
+
+on:
+  schedule:
+    # Every 10 minutes, weekdays 6am-8pm ET (10:00-00:00 UTC roughly)
+    - cron: '*/10 10-23 * * 1-5'
+    - cron: '*/10 0-1 * * 2-6'  # Covers late ET hours (rolling into next UTC day)
+  workflow_dispatch: # Manual trigger for testing
+
+jobs:
+  check-inbox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Write credentials
+        env:
+          GMAIL_CLIENT_SECRET_JSON: ${{ secrets.GMAIL_CLIENT_SECRET_JSON }}
+          GMAIL_TOKEN_JSON: ${{ secrets.GMAIL_TOKEN_JSON }}
+        run: |
+          mkdir -p data
+          echo "$GMAIL_CLIENT_SECRET_JSON" > data/client_secret.json
+          echo "$GMAIL_TOKEN_JSON" > data/gmail_token.json
+
+      - name: Pull latest state
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run download --name reminder-state --dir data 2>/dev/null || echo '{"providers": {}, "flagged_for_review": []}' > data/reminder_state.json
+
+      - name: Run inbox monitor
+        env:
+          DATA_DIR: data
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/run_inbox_monitor.py
+
+      - name: Upload updated state
+        uses: actions/upload-artifact@v4
+        with:
+          name: reminder-state
+          path: data/reminder_state.json
+          overwrite: true
