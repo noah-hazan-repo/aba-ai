@@ -1,58 +1,28 @@
-# aba-ai
+# ABA-AI
 
-BCBA hours monitoring bot powered by OpenClaw. Tracks monthly billing hours from BigQuery and sends email reminders to BCBAs falling behind the 30 hrs/month target.
+**Automated BCBA hours monitoring and outreach for Total Care ABA.**
 
-## Setup
+---
 
-```bash
-chmod +x setup.sh
-./setup.sh
-```
+## What It Does
 
-## Prerequisites
+ABA-AI keeps BCBAs on track to meet their **30-hour monthly billing target** — without anyone having to chase them manually.
 
-- Node.js (for OpenClaw)
-- Python 3.10+
-- Google Cloud project `total-care-aba-462720` with:
-  - BigQuery API enabled
-  - Gmail API enabled
-  - OAuth desktop credentials for `kavanainsights@gmail.com`
-- `gcloud` CLI authenticated (`gcloud auth application-default login`)
+- **Monitors billing hours daily** by pulling each BCBA's progress from the billing system
+- **Sends personalized email reminders** to providers who are falling behind pace, with tone that escalates based on urgency
+- **Listens for replies** and responds intelligently — handling PTO requests, scheduling confirmations, and edge cases automatically
+- **Pauses reminders** when a provider has a valid reason (e.g., leave), and resumes when appropriate
+- **Flags anything unusual** for human review so nothing slips through the cracks
 
-## Configuration
+## How It Works (In Plain English)
 
-1. **Gmail credentials**: Save OAuth client JSON as `workspace/data/client_secret.json`
-2. **Provider emails**: Edit `workspace/data/provider_emails.json` with provider_id -> email mappings
-3. **BigQuery**: Ensure your gcloud auth has access to `total-care-aba-462720.silver.billing_vw`
+Every weekday morning, the system checks where each BCBA stands against their monthly hours goal. Anyone behind pace gets a friendly (but increasingly direct) email nudge. When providers reply — whether to say they're on PTO, have sessions scheduled, or just to push back — the system reads the intent and responds accordingly, no manual intervention needed.
 
-## Cron Jobs
+## Who It's For
 
-After `openclaw gateway start`:
+- **Operations teams** who currently spend time manually tracking and following up on billing hours
+- **BCBAs** who benefit from timely, non-intrusive reminders before the end of the month
 
-```bash
-# Daily hours check (weekdays 8am ET)
-openclaw cron add \
-  --name "daily-hours-check" \
-  --cron "0 8 * * 1-5" \
-  --tz "America/New_York" \
-  --session "session:kavana-hours" \
-  --message "Run the daily hours check. Query BigQuery, review results, and send reminders to BCBAs who are behind pace."
+## The Result
 
-# Inbox monitoring (every 10 min, weekdays 6am-8pm ET)
-openclaw cron add \
-  --name "inbox-monitor" \
-  --cron "*/10 6-20 * * 1-5" \
-  --tz "America/New_York" \
-  --session "session:kavana-inbox" \
-  --message "Check the inbox for new unread emails. Process each reply appropriately."
-```
-
-## Architecture
-
-```
-BigQuery (billing_vw) --> check_hours.py --> OpenClaw Agent --> send_email.py --> Gmail
-                                                  ^
-Gmail Inbox --> check_inbox.py -------------------|
-                                                  |
-                          update_state.py <-------|
-```
+Less manual follow-up. Fewer missed targets. Providers stay informed about their pace without anyone having to micromanage the process.
