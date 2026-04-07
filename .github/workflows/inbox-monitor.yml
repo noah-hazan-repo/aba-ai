@@ -3,8 +3,8 @@ name: Inbox Monitor
 on:
   schedule:
     # Every 10 minutes, weekdays 6am-8pm ET (10:00-00:00 UTC roughly)
-    - cron: '*/10 10-23 * * 1-5'
-    - cron: '*/10 0-1 * * 2-6'  # Covers late ET hours (rolling into next UTC day)
+    # - cron: '*/10 10-23 * * 1-5'
+    # - cron: '*/10 0-1 * * 2-6'  # Covers late ET hours (rolling into next UTC day)
   workflow_dispatch: # Manual trigger for testing
 
 jobs:
