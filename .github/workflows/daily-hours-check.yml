@@ -3,7 +3,7 @@ name: Daily BCBA Hours Check
 on:
   schedule:
     # 8am ET = 12:00 UTC (EDT) or 13:00 UTC (EST)
-    - cron: '0 12 * * 1-5'
+    # - cron: '0 12 * * 1-5'
   workflow_dispatch: # Manual trigger for testing
 
 jobs:
